@@ -19,6 +19,7 @@ struct problem_context {
 	blk64_t	blk, blk2;
 	e2_blkcnt_t	blkcount;
 	int		group;
+	__u32		csum1, csum2;
 	__u64	num;
 	const char *str;
 };
@@ -203,8 +204,8 @@ struct problem_context {
 /* Group descriptor N marked uninitialized without feature set. */
 #define PR_0_GDT_UNINIT				0x000036
 
-/* Block bitmap is not initialised and Inode bitmap is */
-#define PR_0_BB_UNINIT_IB_INIT			0x000037
+/* Block bitmap is not initialised and Inode bitmap is -- NO LONGER USED */
+/* #define PR_0_BB_UNINIT_IB_INIT			0x000037 */
 
 /* Group descriptor N has invalid unused inodes count. */
 #define PR_0_GDT_ITABLE_UNUSED			0x000038
@@ -227,6 +228,26 @@ struct problem_context {
 /* Block group checksum (latch question) */
 #define PR_0_GDT_CSUM_LATCH			0x00003E
 
+/* Free inodes count wrong */
+#define PR_0_FREE_INODE_COUNT			0x00003F
+
+/* Free blocks count wrong */
+#define PR_0_FREE_BLOCK_COUNT			0x000040
+
+/* Make quota file hidden */
+#define	PR_0_HIDE_QUOTA				0x000041
+
+/* Superblock has invalid MMP block. */
+#define PR_0_MMP_INVALID_BLK			0x000042
+
+/* Superblock has invalid MMP magic. */
+#define PR_0_MMP_INVALID_MAGIC			0x000043
+
+/* Opening file system failed */
+#define PR_0_OPEN_FAILED			0x000044
+
+/* Checking group descriptor failed */
+#define PR_0_CHECK_DESC_FAILED			0x000045
 
 /*
  * Pass 1 errors
@@ -517,8 +538,25 @@ struct problem_context {
 /* Extent node header invalid */
 #define PR_1_EXTENT_HEADER_INVALID	0x01005F
 
-/* EOFBLOCKS flag set when not necessary */
-#define PR_1_EOFBLOCKS_FL_SET		0x010060
+/* PR_1_EOFBLOCKS_FL_SET 0x010060 was here */
+
+/* Failed to convert subcluster bitmap */
+#define PR_1_CONVERT_SUBCLUSTER		0x010061
+
+/* Quota inode has wrong mode */
+#define PR_1_QUOTA_BAD_MODE		0x010062
+
+/* Quota inode is not in use, but contains data */
+#define PR_1_QUOTA_INODE_NOT_CLEAR	0x010063
+
+/* Quota inode is user visible */
+#define PR_1_QUOTA_INODE_NOT_HIDDEN	0x010064
+
+/* Invalid bad inode */
+#define PR_1_INVALID_BAD_INODE		0x010065
+
+/* Extent has zero length */
+#define PR_1_EXTENT_LENGTH_ZERO		0x010066
 
 /*
  * Pass 1b errors
@@ -990,6 +1028,9 @@ struct problem_context {
 /* Recreate the journal if E2F_FLAG_JOURNAL_INODE flag is set */
 #define PR_6_RECREATE_JOURNAL		0x060001
 
+/* Update quota information if it is inconsistent */
+#define PR_6_UPDATE_QUOTAS		0x060002
+
 /*
  * Function declarations
  */
@@ -1000,7 +1041,7 @@ int get_latch_flags(int mask, int *value);
 void clear_problem_context(struct problem_context *pctx);
 
 /* message.c */
-void print_e2fsck_message(e2fsck_t ctx, const char *msg,
+void print_e2fsck_message(FILE *f, e2fsck_t ctx, const char *msg,
 			  struct problem_context *pctx, int first,
 			  int recurse);
 

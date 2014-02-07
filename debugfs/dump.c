@@ -5,8 +5,11 @@
  * under the terms of the GNU Public License.
  */
 
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE /* for O_LARGEFILE */
+#endif
 
+#include "config.h"
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -298,8 +301,7 @@ static int rdump_dirent(struct ext2_dir_entry *dirent,
 	const char *dumproot = private;
 	struct ext2_inode inode;
 
-	thislen = ((dirent->name_len & 0xFF) < EXT2_NAME_LEN
-		   ? (dirent->name_len & 0xFF) : EXT2_NAME_LEN);
+	thislen = dirent->name_len & 0xFF;
 	strncpy(name, dirent->name, thislen);
 	name[thislen] = 0;
 

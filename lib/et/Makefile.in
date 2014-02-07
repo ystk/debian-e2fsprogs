@@ -96,6 +96,8 @@ install:: compile_et libcom_err.a $(HFILES) installdirs com_err.pc
 		echo "	INSTALL_DATA $(includedir)/et/$$i"; \
 		$(INSTALL_DATA) $(srcdir)/$$i $(DESTDIR)$(includedir)/et/$$i; \
 	done
+	$(Q) (cd $(DESTDIR)$(includedir) ;\
+		$(LN) $(LINK_INSTALL_FLAGS) et/com_err.h . )
 	$(Q) for i in $(SHARE_FILES); do \
 		echo "	INSTALL_DATA $(datadir)/et/$$i"; \
 		$(INSTALL_DATA) $(srcdir)/$$i $(DESTDIR)$(datadir)/et/$$i; \
@@ -146,12 +148,16 @@ $(OBJS): subdirs
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-error_message.o: $(srcdir)/error_message.c $(srcdir)/com_err.h \
- $(srcdir)/error_table.h $(srcdir)/internal.h
-et_name.o: $(srcdir)/et_name.c $(srcdir)/com_err.h $(srcdir)/error_table.h \
+error_message.o: $(srcdir)/error_message.c $(top_builddir)/lib/config.h \
+ $(top_builddir)/lib/dirpaths.h $(srcdir)/com_err.h $(srcdir)/error_table.h \
  $(srcdir)/internal.h
-init_et.o: $(srcdir)/init_et.c $(srcdir)/com_err.h $(srcdir)/error_table.h
-com_err.o: $(srcdir)/com_err.c $(srcdir)/com_err.h $(srcdir)/error_table.h \
+et_name.o: $(srcdir)/et_name.c $(top_builddir)/lib/config.h \
+ $(top_builddir)/lib/dirpaths.h $(srcdir)/com_err.h $(srcdir)/error_table.h \
  $(srcdir)/internal.h
-com_right.o: $(srcdir)/com_right.c $(srcdir)/com_err.h \
- $(srcdir)/error_table.h
+init_et.o: $(srcdir)/init_et.c $(top_builddir)/lib/config.h \
+ $(top_builddir)/lib/dirpaths.h $(srcdir)/com_err.h $(srcdir)/error_table.h
+com_err.o: $(srcdir)/com_err.c $(top_builddir)/lib/config.h \
+ $(top_builddir)/lib/dirpaths.h $(srcdir)/com_err.h $(srcdir)/error_table.h \
+ $(srcdir)/internal.h
+com_right.o: $(srcdir)/com_right.c $(top_builddir)/lib/config.h \
+ $(top_builddir)/lib/dirpaths.h $(srcdir)/com_err.h $(srcdir)/error_table.h
