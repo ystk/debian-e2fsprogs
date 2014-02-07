@@ -9,6 +9,7 @@
  * %End-Header%
  */
 
+#include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,6 +32,10 @@ static struct mntopt mntopt_list[] = {
 	{ EXT3_DEFM_JMODE_DATA, "journal_data" },
 	{ EXT3_DEFM_JMODE_ORDERED, "journal_data_ordered" },
 	{ EXT3_DEFM_JMODE_WBACK, "journal_data_writeback" },
+	{ EXT4_DEFM_NOBARRIER,	"nobarrier" },
+	{ EXT4_DEFM_BLOCK_VALIDITY, "block_validity" },
+	{ EXT4_DEFM_DISCARD,	"discard"},
+	{ EXT4_DEFM_NODELALLOC,	"nodelalloc"},
 	{ 0, 0 },
 };
 
@@ -61,7 +66,7 @@ int e2p_string2mntopt(char *string, unsigned int *mask)
 			return 0;
 		}
 	}
-	if (strncasecmp(string, "MNTOPT_", 8))
+	if (strncasecmp(string, "MNTOPT_", 7))
 		return 1;
 
 	if (string[8] == 0)
@@ -118,6 +123,7 @@ int e2p_edit_mntopts(const char *str, __u32 *mntopts, __u32 ok)
 		case '-':
 		case '^':
 			neg++;
+			/* fallthrough */
 		case '+':
 			cp++;
 			break;
