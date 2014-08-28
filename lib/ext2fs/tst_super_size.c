@@ -21,7 +21,10 @@
 
 struct sb_struct sb;
 
+#ifndef offsetof
 #define offsetof(type, member)  __builtin_offsetof (type, member)
+#endif
+
 #define check_field(x, s) cur_offset = do_field(#x, s, sizeof(sb.x),	       \
 						offsetof(struct sb_struct, x), \
 						cur_offset)
@@ -132,7 +135,8 @@ int main(int argc, char **argv)
 	check_field(s_usr_quota_inum, 4);
 	check_field(s_grp_quota_inum, 4);
 	check_field(s_overhead_blocks, 4);
-	check_field(s_reserved, 108 * 4);
+	check_field(s_backup_bgs, 8);
+	check_field(s_reserved, 106 * 4);
 	check_field(s_checksum, 4);
 	do_field("Superblock end", 0, 0, cur_offset, 1024);
 #endif
