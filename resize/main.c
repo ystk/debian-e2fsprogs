@@ -36,7 +36,8 @@ extern int optind;
 
 #include "../version.h"
 
-char *program_name, *device_name, *io_options;
+char *program_name;
+static char *device_name, *io_options;
 
 static void usage (char *prog)
 {
@@ -102,7 +103,7 @@ static void determine_fs_stride(ext2_filsys fs)
 {
 	unsigned int	group;
 	unsigned long long sum;
-	unsigned int	has_sb, prev_has_sb, num;
+	unsigned int	has_sb, prev_has_sb = 0, num;
 	int		i_stride, b_stride;
 
 	if (fs->stride)
@@ -145,6 +146,18 @@ static void determine_fs_stride(ext2_filsys fs)
 	if (fs->stride)
 		printf("Using RAID stride of %d\n", fs->stride);
 #endif
+}
+
+static void bigalloc_check(ext2_filsys fs, int force)
+{
+	if (!force && EXT2_HAS_RO_COMPAT_FEATURE(fs->super,
+				EXT4_FEATURE_RO_COMPAT_BIGALLOC)) {
+		fprintf(stderr, "%s", _("\nResizing bigalloc file systems has "
+					"not been fully tested.  Proceed at\n"
+					"your own risk!  Use the force option "
+					"if you want to go ahead anyway.\n\n"));
+		exit(1);
+	}
 }
 
 int main (int argc, char ** argv)
@@ -300,10 +313,21 @@ int main (int argc, char ** argv)
 	retval = ext2fs_open2(device_name, io_options, io_flags,
 			      0, 0, io_ptr, &fs);
 	if (retval) {
-		com_err (program_name, retval, _("while trying to open %s"),
-			 device_name);
-		printf (_("Couldn't find valid filesystem superblock.\n"));
+		com_err(program_name, retval, _("while trying to open %s"),
+			device_name);
+		printf("%s", _("Couldn't find valid filesystem superblock.\n"));
 		exit (1);
+	}
+
+	if (!(mount_flags & EXT2_MF_MOUNTED)) {
+		if (!force && ((fs->super->s_lastcheck < fs->super->s_mtime) ||
+			       (fs->super->s_state & EXT2_ERROR_FS) ||
+			       ((fs->super->s_state & EXT2_VALID_FS) == 0))) {
+			fprintf(stderr,
+				_("Please run 'e2fsck -f %s' first.\n\n"),
+				device_name);
+			exit(1);
+		}
 	}
 
 	/*
@@ -316,35 +340,9 @@ int main (int argc, char ** argv)
 		exit(1);
 	}
 
-	/*
-	 * XXXX   The combination of flex_bg and !resize_inode causes
-	 * major problems for resize2fs, since when the group descriptors
-	 * grow in size this can potentially require multiple inode
-	 * tables to be moved aside to make room, and resize2fs chokes
-	 * rather badly in this scenario.  It's a rare combination,
-	 * except when a filesystem is expanded more than a certain
-	 * size, so for now, we'll just prohibit that combination.
-	 * This is something we should fix eventually, though.
-	 */
-	if ((fs->super->s_feature_incompat & EXT4_FEATURE_INCOMPAT_FLEX_BG) &&
-	    !(fs->super->s_feature_compat & EXT2_FEATURE_COMPAT_RESIZE_INODE)) {
-		com_err(program_name, 0, _("%s: The combination of flex_bg "
-					   "and\n\t!resize_inode features "
-					   "is not supported by resize2fs.\n"),
-			device_name);
-		exit(1);
-	}
-
-	min_size = calculate_minimum_resize_size(fs);
+	min_size = calculate_minimum_resize_size(fs, flags);
 
 	if (print_min_size) {
-		if (!force && ((fs->super->s_state & EXT2_ERROR_FS) ||
-			       ((fs->super->s_state & EXT2_VALID_FS) == 0))) {
-			fprintf(stderr,
-				_("Please run 'e2fsck -f %s' first.\n\n"),
-				device_name);
-			exit(1);
-		}
 		printf(_("Estimated minimum size of the filesystem: %llu\n"),
 		       min_size);
 		exit(0);
@@ -370,7 +368,7 @@ int main (int argc, char ** argv)
 	retval = ext2fs_get_device_size2(device_name, fs->blocksize,
 					 &max_size);
 	if (retval) {
-		com_err(program_name, retval,
+		com_err(program_name, retval, "%s",
 			_("while trying to determine filesystem size"));
 		exit(1);
 	}
@@ -385,18 +383,22 @@ int main (int argc, char ** argv)
 			exit(1);
 		}
 	} else {
-		/* Take down devices exactly 16T to 2^32-1 blocks */
-		if (max_size == (1ULL << 32))
-			max_size--;
-		else if (max_size > (1ULL << 32)) {
-			com_err(program_name, 0, _("New size too large to be "
-				"expressed in 32 bits\n"));
-			exit(1);
-		}
 		new_size = max_size;
 		/* Round down to an even multiple of a pagesize */
 		if (sys_page_size > fs->blocksize)
 			new_size &= ~((sys_page_size / fs->blocksize)-1);
+	}
+	if (!EXT2_HAS_INCOMPAT_FEATURE(fs->super,
+				       EXT4_FEATURE_INCOMPAT_64BIT)) {
+		/* Take 16T down to 2^32-1 blocks */
+		if (new_size == (1ULL << 32))
+			new_size--;
+		else if (new_size > (1ULL << 32)) {
+			com_err(program_name, 0, "%s",
+				_("New size too large to be "
+				  "expressed in 32 bits\n"));
+			exit(1);
+		}
 	}
 
 	if (!force && new_size < min_size) {
@@ -406,7 +408,7 @@ int main (int argc, char ** argv)
 	}
 	if (use_stride >= 0) {
 		if (use_stride >= (int) fs->super->s_blocks_per_group) {
-			com_err(program_name, 0,
+			com_err(program_name, 0, "%s",
 				_("Invalid stride length"));
 			exit(1);
 		}
@@ -443,16 +445,10 @@ int main (int argc, char ** argv)
 		exit(0);
 	}
 	if (mount_flags & EXT2_MF_MOUNTED) {
+		bigalloc_check(fs, force);
 		retval = online_resize_fs(fs, mtpt, &new_size, flags);
 	} else {
-		if (!force && ((fs->super->s_lastcheck < fs->super->s_mtime) ||
-			       (fs->super->s_state & EXT2_ERROR_FS) ||
-			       ((fs->super->s_state & EXT2_VALID_FS) == 0))) {
-			fprintf(stderr,
-				_("Please run 'e2fsck -f %s' first.\n\n"),
-				device_name);
-			exit(1);
-		}
+		bigalloc_check(fs, force);
 		printf(_("Resizing the filesystem on "
 			 "%s to %llu (%dk) blocks.\n"),
 		       device_name, new_size, fs->blocksize / 1024);
@@ -468,7 +464,7 @@ int main (int argc, char ** argv)
 			_("Please run 'e2fsck -fy %s' to fix the filesystem\n"
 			  "after the aborted resize operation.\n"),
 			device_name);
-		ext2fs_close(fs);
+		ext2fs_close_free(&fs);
 		exit(1);
 	}
 	printf(_("The filesystem on %s is now %llu blocks long.\n\n"),
