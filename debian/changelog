@@ -1,3 +1,52 @@
+e2fsprogs (1.41.12-4+deb6u1) squeeze-lts; urgency=low
+
+  * Non-maintainer upload by the Debian LTS team.
+  * libext2fs: Fix buffer overflow if s_first_meta_bg is too big
+    as reported in CVE-2015-0247. 
+    Refer to upstream commit:
+    https://git.kernel.org/cgit/fs/ext2/e2fsprogs.git/commit/?id=f66e6ce4
+
+ -- Nguyen Cong <cong.nguyenthe@toshiba-tsdv.com>  Tue, 10 Feb 2015 08:50:40 +0700
+
+e2fsprogs (1.41.12-4stable1) stable; urgency=high
+
+  * Upload to proposed-updates
+  * Fix "mke2fs -n" so it won't issue a discard and thus trash all
+     the data on an SSD (oops!!!)
+
+ -- Theodore Y. Ts'o <tytso@mit.edu>  Sat, 18 Jun 2011 13:19:53 -0400
+
+e2fsprogs (1.41.12-4) unstable; urgency=high
+
+  * Clear ext4 error fields in the superblock.  Otherwise users will see
+    scary messages every 24 hours after a file system error is detected,
+    even after e2fsck has fixed it, if they are using Linux 2.6.35 or later.
+  * Fix usage message for logsave (Closes: #619788)
+
+ -- Theodore Y. Ts'o <tytso@mit.edu>  Sat, 07 May 2011 21:22:54 -0400
+
+e2fsprogs (1.41.12-3) unstable; urgency=high
+
+  * Fix signed vs. unsigned char bug in getopt in e2fsprogs which
+    afflicts systems with default unsigned char
+  * Fix bug in e2fsck where it would fail to fix file systems
+    where both the primary and backup block group descriptors are
+    corrupted.  (Addresses Ubuntu Launchpad bug: #711799)
+  * Fix package description: fsck has been moved to util-linux
+    (Closes: #588726)
+  * Fix badblocks so it the progress message correctly handles UTF-8
+    characters for I18N systems (Closes: #583782, #587834)
+  * Prevent e2fsck from accidentally scrambling a file system when
+    checking a snapshot which has an external journal device (which has
+    not been snapshotted).  (Closes: #587531)
+  * Fix inode nlink accounting that would lead to very scary PROGRAMMING
+    BUG errors.  (Closes: #555456)
+  * Fix typos, spelling mistakes, spelling-out-the-obvious-to-clueless-
+    sysadmins, etc. in man pages.  (Closes: #589345, #594004, #580236,
+    #591083, #505719, #599786)
+
+ -- Theodore Y. Ts'o <tytso@mit.edu>  Sat, 30 Apr 2011 12:30:24 -0400
+
 e2fsprogs (1.41.12-2) unstable; urgency=high
 
   * Allow tune2fs to set uninit_bg without requiring an fsck

@@ -304,9 +304,11 @@ errcode_t ext2fs_open2(const char *name, const char *io_options,
 		group_block = fs->super->s_first_data_block;
 	dest = (char *) fs->group_desc;
 	groups_per_block = EXT2_DESC_PER_BLOCK(fs->super);
-	if (fs->super->s_feature_incompat & EXT2_FEATURE_INCOMPAT_META_BG)
+	if (fs->super->s_feature_incompat & EXT2_FEATURE_INCOMPAT_META_BG) {
 		first_meta_bg = fs->super->s_first_meta_bg;
-	else
+		if (first_meta_bg > fs->desc_blocks)
+			first_meta_bg = fs->desc_blocks;
+	} else
 		first_meta_bg = fs->desc_blocks;
 	if (first_meta_bg) {
 		retval = io_channel_read_blk(fs->io, group_block+1,

@@ -284,9 +284,11 @@ errcode_t ext2fs_flush(ext2_filsys fs)
 	 * superblocks and group descriptors.
 	 */
 	group_ptr = (char *) group_shadow;
-	if (fs->super->s_feature_incompat & EXT2_FEATURE_INCOMPAT_META_BG)
+	if (fs->super->s_feature_incompat & EXT2_FEATURE_INCOMPAT_META_BG) {
 		old_desc_blocks = fs->super->s_first_meta_bg;
-	else
+		if (old_desc_blocks > fs->super->s_first_meta_bg)
+			old_desc_blocks = fs->desc_blocks;
+	} else
 		old_desc_blocks = fs->desc_blocks;
 
 	for (i = 0; i < fs->group_desc_count; i++) {

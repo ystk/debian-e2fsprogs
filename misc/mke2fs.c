@@ -2025,7 +2025,7 @@ int main (int argc, char *argv[])
 	}
 
 	/* Can't undo discard ... */
-	if (discard && (io_ptr != undo_io_manager))
+	if (!noaction && discard && (io_ptr != undo_io_manager))
 		mke2fs_discard_blocks(fs);
 
 	sprintf(tdb_string, "tdb_data_size=%d", fs->blocksize <= 4096 ?
