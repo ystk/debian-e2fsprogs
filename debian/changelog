@@ -1,3 +1,11 @@
+e2fsprogs (1.41.12-4+deb6u2) squeeze-lts; urgency=high
+
+  * Non-maintainer upload by the Debian LTS team.
+  * Fix CVE-2015-1572: incomplete fix for CVE-2015-0247.
+    (closes: #778948)
+
+ -- Thorsten Alteholz <debian@alteholz.de>  Sat, 28 Feb 2015 19:00:40 +0100
+
 e2fsprogs (1.41.12-4+deb6u1) squeeze-lts; urgency=low
 
   * Non-maintainer upload by the Debian LTS team.

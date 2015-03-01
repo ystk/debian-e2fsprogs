@@ -227,7 +227,7 @@ errcode_t ext2fs_flush(ext2_filsys fs)
 	dgrp_t		j;
 #endif
 	char	*group_ptr;
-	int	old_desc_blocks;
+	blk64_t	old_desc_blocks;
 
 	EXT2_CHECK_MAGIC(fs, EXT2_ET_MAGIC_EXT2FS_FILSYS);
 
@@ -286,7 +286,7 @@ errcode_t ext2fs_flush(ext2_filsys fs)
 	group_ptr = (char *) group_shadow;
 	if (fs->super->s_feature_incompat & EXT2_FEATURE_INCOMPAT_META_BG) {
 		old_desc_blocks = fs->super->s_first_meta_bg;
-		if (old_desc_blocks > fs->super->s_first_meta_bg)
+		if (old_desc_blocks > fs->desc_blocks)
 			old_desc_blocks = fs->desc_blocks;
 	} else
 		old_desc_blocks = fs->desc_blocks;
