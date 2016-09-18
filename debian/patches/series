@@ -1,1 +1,6 @@
 CVE-2015-1572.patch
+e2fsck-use-PROMPT_NONE-for-FUTURE_SB_LAST_-_FUDGED-problems.patch
+e2fsck-fix-corruption-of-Hurd-filesystems.patch
+e2fsck-fix-dangling-pointer-when-dir_info-array-is-resized.patch
+e2fsck-fix-free-pointer-dereferences.patch
+resize2fs-fix-fs-blocksize-dereference-after-fs-has-been-freed.patch

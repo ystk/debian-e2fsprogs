@@ -1,3 +1,12 @@
+e2fsprogs (1.42.12-2) jessie; urgency=medium
+
+  * NMU acknowledge (closes: #778948)
+  * Disable prompts for time skew which is fudged in e2fsck (closes: #812141)
+  * Fix potential corruption of Hurd file systems by e2fsck
+  * Fix pointer bugs that could cause crashes in e2fsck and resize2fs
+
+ -- Theodore Y. Ts'o <tytso@mit.edu>  Sat, 04 Jun 2016 11:58:06 -0400
+
 e2fsprogs (1.42.12-1.1) unstable; urgency=high
 
   * Non-maintainer upload by the Security Team.
