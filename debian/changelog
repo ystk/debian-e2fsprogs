@@ -1,3 +1,12 @@
+e2fsprogs (1.42.12-2+deb8u1) jessie-security; urgency=high
+
+  * Non-maintainer upload by the LTS Team. 
+  * CVE-2019-5094
+    A maliciously corrupted file systems can trigger buffer overruns
+    in the quota code used by e2fsck.
+ 
+ -- Thorsten Alteholz <debian@alteholz.de>  Thu, 26 Sep 2019 19:03:02 +0200
+
 e2fsprogs (1.42.12-2) jessie; urgency=medium
 
   * NMU acknowledge (closes: #778948)
