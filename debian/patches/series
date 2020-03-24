@@ -5,3 +5,5 @@ e2fsck-fix-dangling-pointer-when-dir_info-array-is-resized.patch
 e2fsck-fix-free-pointer-dereferences.patch
 resize2fs-fix-fs-blocksize-dereference-after-fs-has-been-freed.patch
 CVE-2019-5094.patch
+CVE-2019-5188-1.patch
+CVE-2019-5188-2.patch
