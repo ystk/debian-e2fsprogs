@@ -374,6 +374,10 @@ ifneq ($(ismips),)
 		LIB_SUBDIRS="lib/et lib/ext2fs" libs
 endif
 
+ifeq (,$(findstring nocheck,$(DEB_BUILD_OPTIONS)))
+	$(MAKE) -C ${stdbuilddir} V=1 check
+endif
+
 	touch ${BUILDSTDSTAMP}
 
 build-bf: ${BUILDBFSTAMP}

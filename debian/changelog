@@ -1,3 +1,11 @@
+e2fsprogs (1.42.12-2+deb8u3) jessie-security; urgency=medium
+
+  * Non-maintainer upload by the ELTS Team.
+  * CVE-2022-1304: e2fsck out-of-bounds read/write
+  * Run the upstream tests during build.
+
+ -- Adrian Bunk <bunk@debian.org>  Fri, 04 Oct 2024 13:41:41 +0300
+
 e2fsprogs (1.42.12-2+deb8u2) jessie-security; urgency=high
 
   * Non-maintainer upload by the LTS Team. 
